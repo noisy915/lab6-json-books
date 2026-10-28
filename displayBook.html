@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Search & Details Viewer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f4f4f9;
+        }
+        .container {
+            max-width: 400px;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+        .details-box {
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #fafafa;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Book Search Portal</h2>
+        
+        <!-- (iii) Select element to allow user to select a book title -->
+        <label for="bookSelect"><strong>Select a Book Title:</strong></label>
+        <select id="bookSelect">
+            <option value="">-- Choose a book --</option>
+        </select>
+
+        <!-- (iv) Display book details container -->
+        <div id="bookDetails" class="details-box">
+            <p style="color: #666;">Please select a book from the dropdown above to view its details.</p>
+        </div>
+    </div>
+
+    <script>
+        let booksData = [];
+
+        // (ii) Use JavaScript's fetch() to load the JSON file
+        fetch('books.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to load JSON data');
+                }
+                return response.json();
+            })
+            .then(data => {
+                booksData = data.Books;
+                const selectElement = document.getElementById('bookSelect');
+
+                // Populate the dropdown dynamically with book titles
+                booksData.forEach((book, index) => {
+                    const option = document.createElement('option');
+                    option.value = index; // Store index reference
+                    option.textContent = book.title;
+                    selectElement.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('bookDetails').innerHTML = '<p style="color: red;">Error loading book data.</p>';
+            });
+
+        // (iii & iv) Event listener to search matching record and display details
+        document.getElementById('bookSelect').addEventListener('change', function() {
+            const selectedIndex = this.value;
+            const detailsBox = document.getElementById('bookDetails');
+
+            // Handle case where default option is selected
+            if (selectedIndex === "") {
+                detailsBox.innerHTML = '<p style="color: #666;">Please select a book from the dropdown above to view its details.</p>';
+                return;
+            }
+
+            // Find matching book record
+            const book = booksData[selectedIndex];
+
+            if (book) {
+                // Display book's title, author, publication year, and genres
+                detailsBox.innerHTML = `
+                    <h3>${book.title}</h3>
+                    <p><strong>Author:</strong> ${book.author}</p>
+                    <p><strong>Publication Year:</strong> ${book.publicationYear}</p>
+                    <p><strong>Genres:</strong> ${book.genres.join(', ')}</p>
+                `;
+            } else {
+                // Appropriate message if book is not found
+                detailsBox.innerHTML = '<p style="color: red;">Selected book record was not found.</p>';
+            }
+        });
+    </script>
+
+</body>
+</html>
